@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Study Planner</title>
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+</head>
+<body>
+  <header>
+    <h1>&#128216; Smart Study Planner</h1>
+    <button id="theme-toggle"><i class="fas fa-moon"></i></button>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="tasks-tab">&#128221; Tasks</button>
+    <button class="tab-btn" data-tab="progress-tab">&#128202; Progress</button>
+  </nav>
+
+  <section id="tasks-tab" class="tab-content active">
+    <div id="task-input">
+      <input type="text" id="task-title" placeholder="Enter your task..." required>
+      <input type="date" id="task-date" required>
+      <select id="task-subject">
+        <option value="General">General</option>
+        <option value="Mathematics">Mathematics</option>
+        <option value="Computer Science">Computer Science</option>
+        <option value="Physics">Physics</option>
+        <option value="Chemistry">Chemistry</option>
+        <option value="Biology">Biology</option>
+        <option value="Economics">Economics</option>
+        <option value="English">English</option>
+        <option value="Other">Other</option>
+      </select>
+      <input type="text" id="custom-subject" placeholder="Enter custom subject" style="display:none;">
+      <select id="task-priority">
+        <option value="Low">Low</option>
+        <option value="Medium">Medium</option>
+        <option value="High">High</option>
+      </select>
+      <button id="add-task"><i class="fas fa-plus"></i> Add Task</button>
+    </div>
+
+    <div id="task-controls">
+      <input type="text" id="search-task" placeholder="&#128269; Search tasks...">
+      <select id="filter-subject">
+        <option value="All">All Subjects</option>
+        <option value="General">General</option>
+        <option value="Mathematics">Mathematics</option>
+        <option value="Computer Science">Computer Science</option>
+        <option value="Physics">Physics</option>
+        <option value="Chemistry">Chemistry</option>
+        <option value="Biology">Biology</option>
+        <option value="Economics">Economics</option>
+        <option value="English">English</option>
+        <option value="Other">Other</option>
+      </select>
+      <select id="filter-priority">
+        <option value="All">All Priorities</option>
+        <option value="Low">Low</option>
+        <option value="Medium">Medium</option>
+        <option value="High">High</option>
+      </select>
+    </div>
+
+    <ul id="tasks"></ul>
+
+    <div id="mini-calendar">
+      <h3>&#128197; Task Calendar</h3>
+      <div id="calendar-grid"></div>
+    </div>
+  </section>
+
+  <section id="progress-tab" class="tab-content">
+    <div id="progress">
+      <h2>&#128200; Progress Tracker</h2>
+      <p id="greeting">Welcome!</p>
+      <progress id="progress-bar" value="0" max="100"></progress>
+      <p id="progress-text">0% completed</p>
+    </div>
+
+    <div id="analytics">
+      <h2>&#128202; Study Analytics</h2>
+      <canvas id="studyChart"></canvas>
+      <canvas id="priorityChart"></canvas>
+      <canvas id="trendChart"></canvas>
+    </div>
+
+    <div id="suggestions">
+      <h2>&#128161; Smart Suggestions</h2>
+      <p id="suggestion-text">Complete some tasks to get study tips!</p>
+    </div>
+
+    <div id="points-level">
+      <h2>&#127942; Points & Level</h2>
+      <p id="points-text">0 points | Level 1</p>
+    </div>
+  </section>
+
+  <script src="script.js"></script>
+  <script src="charts.js"></script>
+</body>
+</html>

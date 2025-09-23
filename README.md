@@ -41,6 +41,7 @@ This project uses *HTML, CSS, and JavaScript* (with Local Storage and Chart.js) 
 
 1. Clone the repository:
    ```bash
+   https://github.com/Siva-2511/Smart_study_planner/tree/main
 
 2. Open index.html in a web browser.
 

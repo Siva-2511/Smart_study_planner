@@ -63,6 +63,7 @@ https://smartstudyplanners.netlify.app/
 
 View the presentation online 
 https://docs.google.com/presentation/d/1kIi5ugQZsgPV8-X3sz_BbD5UhBsNtZM4/edit?usp=drivesdk&ouid=107157099761393182296&rtpof=true&sd=true
+
 ---
 
 🔹 Future Scope

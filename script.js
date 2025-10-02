@@ -12,7 +12,7 @@ const contents = document.querySelectorAll(".tab-content");
 
 const subjectSelect = document.getElementById("task-subject");
 const customInput = document.getElementById("custom-subject");
-// Calendar view state (0-based month)
+
 let calendarViewYear = (new Date()).getFullYear();
 let calendarViewMonth = (new Date()).getMonth(); // 0 = Jan, 9 = Oct
 
@@ -198,12 +198,11 @@ function filterTasks() {
 const calendarGrid = document.getElementById("calendar-grid");
 
 function updateCalendar(selectedDate = null) {
-  // If a selectedDate string (YYYY-MM-DD) is provided, show that month
   if (selectedDate) {
     const parts = selectedDate.split("-");
     if (parts.length === 3) {
       calendarViewYear = Number(parts[0]);
-      calendarViewMonth = Number(parts[1]) - 1; // monthIndex
+      calendarViewMonth = Number(parts[1]) - 1; 
     }
   }
 
@@ -219,18 +218,15 @@ function updateCalendar(selectedDate = null) {
   }
   calendarGrid.innerHTML = "";
 
-  // Compute first day index and number of days for the view month
   const startDay = new Date(calendarViewYear, calendarViewMonth, 1).getDay();
   const daysInMonth = new Date(calendarViewYear, calendarViewMonth + 1, 0).getDate();
 
-  // Add empty boxes for days before month start
   for (let i = 0; i < startDay; i++) {
     const emptyDiv = document.createElement("div");
     emptyDiv.className = "calendar-day empty";
     calendarGrid.appendChild(emptyDiv);
   }
 
-  // Create day cells
   for (let day = 1; day <= daysInMonth; day++) {
     const dayDiv = document.createElement("div");
     dayDiv.className = "calendar-day";
@@ -238,17 +234,14 @@ function updateCalendar(selectedDate = null) {
 
     const dateStr = `${calendarViewYear}-${String(calendarViewMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 
-    // Highlight days that have tasks (exact YYYY-MM-DD match)
     if (tasks.some(t => t.date.startsWith (dateStr))) {
       dayDiv.classList.add("has-task");
     }
 
-    // Highlight if this is the selected date
     if (selectedDate === dateStr) {
       dayDiv.classList.add("selected-date");
     }
 
-    // Click a day to set the top input and re-render calendar for that month
     dayDiv.addEventListener("click", () => {
       const input = document.getElementById("task-date");
       if (input) input.value = dateStr;
@@ -280,13 +273,13 @@ document.getElementById("next-month").addEventListener("click", () => {
 const taskDateInput = document.getElementById("task-date");
 if (taskDateInput) {
   taskDateInput.addEventListener("change", (e) => {
-    const v = e.target.value; // YYYY-MM-DD
+    const v = e.target.value; 
     if (v) updateCalendar(v);
   });
 }
 // ====== Initial Load ======
 document.addEventListener("DOMContentLoaded", () => {
   renderTasks();
-  const todayStr = new Date().toISOString().split("T")[0]; // today's YYYY-MM-DD
+  const todayStr = new Date().toISOString().split("T")[0]; 
   updateCalendar(todayStr);
 });

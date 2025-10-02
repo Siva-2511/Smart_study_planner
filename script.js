@@ -12,12 +12,15 @@ const contents = document.querySelectorAll(".tab-content");
 
 const subjectSelect = document.getElementById("task-subject");
 const customInput = document.getElementById("custom-subject");
+// Calendar view state (0-based month)
+let calendarViewYear = (new Date()).getFullYear();
+let calendarViewMonth = (new Date()).getMonth(); // 0 = Jan, 9 = Oct
 
 // ====== Greeting ======
 function updateGreeting() {
   const hour = new Date().getHours();
   const greet = hour < 12 ? "Good Morning!" : hour < 18 ? "Good Afternoon!" : "Good Evening!";
-  greetingText.innerText = `Smart Study Planner — ${greet}`;
+  greetingText.innerText = `📘Smart Study Planner — ${greet}`;
 }
 updateGreeting();
 
@@ -47,14 +50,22 @@ subjectSelect.addEventListener("change", () => {
 // ====== Add Task ======
 document.getElementById("add-task").addEventListener("click", () => {
   const title = document.getElementById("task-title").value.trim();
-  const date = document.getElementById("task-date").value;
+  const dateInput = document.getElementById("task-date").value;
+const timeInput = document.getElementById("task-time").value || "23:59";
+const date = `${dateInput} ${timeInput}`;
+
   const priority = document.getElementById("task-priority").value;
   let subject = subjectSelect.value === "Other" ? customInput.value.trim() : subjectSelect.value;
 
   if (!title || !date || !subject) return alert("Task, Date, and Subject are required!");
   if (subjectSelect.value === "Other" && !customInput.value.trim()) return alert("Please enter a custom subject name.");
 
-  tasks.push({ title, date, subject, priority, completed: false });
+  tasks.push({ title, date, subject, priority, completed: false, reminded: false });
+
+  document.getElementById("task-title").value = "";
+document.getElementById("task-date").value = "";
+document.getElementById("task-time").value = "";
+
 
   document.getElementById("task-title").value = "";
   if (subjectSelect.value === "Other") customInput.value = "";
@@ -79,7 +90,8 @@ function renderTasks() {
     else li.classList.add("fresh");
 
     li.innerHTML = `
-      <span> <strong>${task.title}</strong> | ${task.subject} | ${task.priority} | Due: ${task.date}</span>
+    <span class="task-meta"> Due: ${task.date}</span>
+      <span class="task-title"> <strong>${task.title}</strong> | ${task.subject} | ${task.priority} </span>
       <div>
         <button onclick="toggleTask(${index})"><i class="fas fa-check"></i></button>
         <button onclick="deleteTask(${index})"><i class="fas fa-trash"></i></button>
@@ -87,9 +99,10 @@ function renderTasks() {
     `;
     taskList.appendChild(li);
 
-    if (!task.completed && diffDays === 0) {
-      setTimeout(() => alert(` Reminder: Task "${task.title}" is due today!`), 500);
-    }
+    if (!task.completed && diffDays === 0 && !task.reminded) {
+      setTimeout(() => alert(`🚨 Reminder: Task "${task.title}" is due today!`), 500);
+      task.reminded = true;
+    }    
   });
 
   updateProgress();
@@ -97,6 +110,10 @@ function renderTasks() {
   updateCalendar();
   updateChart();
   localStorage.setItem("tasks", JSON.stringify(tasks));
+  setTimeout(() => {
+    if (typeof updateAll === "function") updateAll();
+  }, 100);
+  
 }
 
 // ====== Toggle Task ======
@@ -125,7 +142,7 @@ function updateProgress() {
 
 function generateSuggestion() {
   if (tasks.length === 0) {
-    suggestionText.innerText = " Add some tasks to get study tips!";
+    suggestionText.innerText = "📝 Add some tasks to get study tips!";
     return;
   }
 
@@ -143,10 +160,10 @@ function generateSuggestion() {
   });
 
   let suggestion = "";
-  if (weakest.total === 0) suggestion = " All subjects are balanced. Keep adding tasks!";
+  if (weakest.total === 0) suggestion = "⚖️ All subjects are balanced. Keep adding tasks!";
   else if (weakest.done / weakest.total < 0.5)
-    suggestion = `Focus more on ${weakest.subject}. Completion: ${weakest.done}/${weakest.total}`;
-  else suggestion = " You're doing well! Keep up the consistency.";
+    suggestion = `🎯Focus more on ${weakest.subject}. Completion: ${weakest.done}/${weakest.total}`;
+  else suggestion = "🌟 You're doing well! Keep up the consistency.";
 
   suggestionText.innerText = suggestion;
 }
@@ -180,25 +197,96 @@ function filterTasks() {
 // ====== Mini Calendar ======
 const calendarGrid = document.getElementById("calendar-grid");
 
-function updateCalendar() {
-  calendarGrid.innerHTML = "";
-  const today = new Date();
-  const startDay = new Date(today.getFullYear(), today.getMonth(), 1).getDay();
-  const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+function updateCalendar(selectedDate = null) {
+  // If a selectedDate string (YYYY-MM-DD) is provided, show that month
+  if (selectedDate) {
+    const parts = selectedDate.split("-");
+    if (parts.length === 3) {
+      calendarViewYear = Number(parts[0]);
+      calendarViewMonth = Number(parts[1]) - 1; // monthIndex
+    }
+  }
 
+  if (!calendarGrid) return;
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+  
+  const monthLabel = document.getElementById("calendar-month");
+  if (monthLabel) {
+    monthLabel.innerText = `${monthNames[calendarViewMonth]} ${calendarViewYear}`;
+  }
+  calendarGrid.innerHTML = "";
+
+  // Compute first day index and number of days for the view month
+  const startDay = new Date(calendarViewYear, calendarViewMonth, 1).getDay();
+  const daysInMonth = new Date(calendarViewYear, calendarViewMonth + 1, 0).getDate();
+
+  // Add empty boxes for days before month start
   for (let i = 0; i < startDay; i++) {
     const emptyDiv = document.createElement("div");
+    emptyDiv.className = "calendar-day empty";
     calendarGrid.appendChild(emptyDiv);
   }
 
+  // Create day cells
   for (let day = 1; day <= daysInMonth; day++) {
     const dayDiv = document.createElement("div");
     dayDiv.className = "calendar-day";
     dayDiv.innerText = day;
 
-    const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-    if (tasks.some(t => t.date === dateStr)) dayDiv.classList.add("has-task");
+    const dateStr = `${calendarViewYear}-${String(calendarViewMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+
+    // Highlight days that have tasks (exact YYYY-MM-DD match)
+    if (tasks.some(t => t.date.startsWith (dateStr))) {
+      dayDiv.classList.add("has-task");
+    }
+
+    // Highlight if this is the selected date
+    if (selectedDate === dateStr) {
+      dayDiv.classList.add("selected-date");
+    }
+
+    // Click a day to set the top input and re-render calendar for that month
+    dayDiv.addEventListener("click", () => {
+      const input = document.getElementById("task-date");
+      if (input) input.value = dateStr;
+      updateCalendar(dateStr);
+    });
 
     calendarGrid.appendChild(dayDiv);
   }
 }
+
+document.getElementById("prev-month").addEventListener("click", () => {
+  calendarViewMonth--;
+  if (calendarViewMonth < 0) {
+    calendarViewMonth = 11;
+    calendarViewYear--;
+  }
+  updateCalendar();
+});
+
+document.getElementById("next-month").addEventListener("click", () => {
+  calendarViewMonth++;
+  if (calendarViewMonth > 11) {
+    calendarViewMonth = 0;
+    calendarViewYear++;
+  }
+  updateCalendar();
+});
+
+const taskDateInput = document.getElementById("task-date");
+if (taskDateInput) {
+  taskDateInput.addEventListener("change", (e) => {
+    const v = e.target.value; // YYYY-MM-DD
+    if (v) updateCalendar(v);
+  });
+}
+// ====== Initial Load ======
+document.addEventListener("DOMContentLoaded", () => {
+  renderTasks();
+  const todayStr = new Date().toISOString().split("T")[0]; // today's YYYY-MM-DD
+  updateCalendar(todayStr);
+});

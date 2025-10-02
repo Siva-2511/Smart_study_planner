@@ -54,7 +54,7 @@ function updateChart() {
         legend: { display: false },
         tooltip: {
           callbacks: {
-            label: ctx => `${ctx.label}: ${ctx.raw} tasks completed`
+            label: ctx => `${ctx.label}: ${ctx.raw} tasks completed✅`
           }
         }
       },
